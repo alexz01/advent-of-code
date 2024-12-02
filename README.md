@@ -1,3 +1,3 @@
-# advent-of-code-2024
+# advent-of-code
 
-[advent of code 2024 puzzles](https://adventofcode.com/2024)
+My solutions for [advent of code](https://adventofcode.com/) 
