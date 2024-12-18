@@ -77,7 +77,7 @@ function puzzle1Brute(useSample) {
             bottomRight &= row + offset < maxRows && col + offset < maxCols && mat[row + offset][col + offset] == XMAS[offset];
         }
 
-        if(process.env.debug === 'True'){
+        if (process.env.debug === 'True') {
             let debug = ''
             debug += topLeft && `tl(${row}, ${col}) -> (${row - 3}, ${col - 3})\n` || '';
             debug += topTop && `tt(${row}, ${col}) -> (${row - 3}, ${col})\n` || '';
@@ -109,7 +109,8 @@ function puzzle1Brute(useSample) {
     return xmasCount;
 }
 
-console.log(puzzle1Brute(false));
+console.log(puzzle1Brute(true));
+console.log(puzzle1Brute());
 
 /**
  * --- Part Two ---
@@ -141,3 +142,47 @@ In this example, an X-MAS appears 9 times.
 Flip the word search from the instructions back over to the word search side and try again.
 How many times does an X-MAS appear?
  */
+
+function puzzle2(useSample) {
+    let file = '';
+    const fileName = useSample ? 'day4-sample.txt' : 'day4.txt'
+    file = readFileSync('./inputs/' + fileName, 'utf8');
+
+    const mat = file.split('\n');
+    let xmasCount = 0;
+
+    function isXMAS(mat, row, col) {
+        const R = mat.length,
+            C = mat[0].length;
+        const pos = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+
+        if (row - 1 >= 0 && col - 1 >= 0 && row + 1 < R && col + 1 < C) {
+            for (let [ri, ci] of pos) {
+                if (mat[row + ri][col + ci] === 'M'
+                    && mat[row - ri][col - ci] === 'S'
+                    && (
+                        mat[row - ri][col + ci] === 'M'
+                        && mat[row + ri][col - ci] === 'S'
+                        || mat[row + ri][col - ci] === 'M'
+                        && mat[row - ri][col + ci] === 'S'
+                    )
+                ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    for (row = 0; row < mat.length; row++) {
+        for (col = 0; col < mat[0].length; col++) {
+            if (mat[row][col] == 'A') {
+                xmasCount += isXMAS(mat, row, col, mat.length, mat[0].length);
+            }
+        }
+    }
+    return xmasCount;
+}
+
+console.log(puzzle2(true));
+console.log(puzzle2());
