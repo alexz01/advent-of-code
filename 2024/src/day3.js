@@ -53,7 +53,7 @@ function puzzle1Self(usesample) {
     let i = 0;
     let sum = 0;
     while (i < str.length) {
-        if('mul(' == str.slice(i, i + 4)) {
+        if ('mul(' == str.slice(i, i + 4)) {
             let num1 = 0,
                 num2 = 0;
             i += 4;
@@ -76,7 +76,7 @@ function puzzle1Self(usesample) {
             sum += num1 * num2;
             i = j + 1;
         }
-        else{
+        else {
             i++;
         }
     }
@@ -109,3 +109,59 @@ This time, the sum of the results is 48 (2*4 + 8*5).
 
 Handle the new instructions; what do you get if you add up all of the results of just the enabled multiplications?
  */
+
+function puzzle2(usesample) {
+    let str = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
+
+    if (!usesample) {
+        str = fs.readFileSync('./inputs/day3.txt', 'utf8');
+    }
+
+    const DONT = "don't()";
+    const DO = "do()"
+    const MUL = "mul("
+
+    let i = 0;
+    let sum = 0;
+    let mulEnabled = true;
+    while (i < str.length) {
+
+        if (DONT == str.slice(i, i + DONT.length)) {
+            mulEnabled = false;
+        }
+        else if (DO == str.slice(i, i + DO.length)) {
+            mulEnabled = true;
+        }
+
+        /**parse mul(\d+,\d+) */
+        if (mulEnabled && MUL == str.slice(i, i + MUL.length)) {
+            let num1 = 0,
+                num2 = 0;
+            i += 4;
+            let j = i;
+            while (j < i + 3 && str[j] >= '0' && str[j] <= '9') {
+                j++;
+            }
+            if (j == i || str[j] != ',') continue;
+
+            num1 = parseInt(str.slice(i, j));
+
+            i = j + 1;
+            j = i;
+
+            while (j < i + 3 && str[j] >= '0' && str[j] <= '9') {
+                j++;
+            }
+            if (j == i || str[j] != ')') continue;
+            num2 = parseInt(str.slice(i, j));
+            sum += num1 * num2;
+            i = j + 1;
+        }
+        else {
+            i++;
+        }
+    }
+    return sum;
+}
+
+console.log(puzzle2());

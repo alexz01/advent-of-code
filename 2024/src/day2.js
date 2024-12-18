@@ -51,7 +51,7 @@ function getReportList(trySample = false) {
     const reportLines = inputText.split('\n');
     const reportList = [];
     for (const reportLine of reportLines) {
-        const reportLevels = reportLine.trim().split(' ').map(v => parseInt(v));
+        const reportLevels = reportLine.trim().split(' ').map(v => parseInt(v.trim()));
         reportList.push(reportLevels);
     }
     return reportList;
@@ -67,25 +67,29 @@ function getReportList(trySample = false) {
  *  - Any two adjacent levels differ by at least one and at most three.
  * @return {number} number of safe reports;
  */
+
+function isSafe(report) {
+    let increasing = report[0] < report[report.length - 1];
+    for (let i = 0; i < report.length - 1; i++) {
+        const diff = Math.abs(report[i] - report[i + 1]);
+
+        if (increasing && report[i] > report[i + 1]
+            || !increasing && report[i] < report[i + 1]
+            || diff < 1
+            || diff > 3
+        ) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function puzzle1(useSample = false) {
     const reports = getReportList(useSample);
     let safeCount = 0;
     for (const report of reports) {
-        let increasing = report[0] < report[report.length - 1];
-        let isSafe = 1;
-        for (let i = 0; i < report.length - 1; i++) {
-            const diff = Math.abs(report[i] - report[i + 1]);
 
-            if (increasing && report[i] > report[i + 1]
-                || !increasing && report[i] < report[i + 1]
-                || diff < 1
-                || diff > 3
-            ) {
-                isSafe = 0;
-                break;
-            }
-        }
-        safeCount += isSafe;
+        safeCount += isSafe(report);
     }
     return safeCount;
 }
@@ -127,40 +131,20 @@ function puzzle2(useSample = false) {
     let safeCount = 0;
     let output = [];
 
-    function increasingUnsafeCount(report) {
-        if (report.length <= 1)
-            return 0;
-
-        const diff = report[1] - report[0];
-        if (diff >= 1 && diff <= 3) {
-            return increasingUnsafeCount(report.slice(1));
-        }
-        return 1 + increasingUnsafeCount([report[0], ...report.slice(2)])
-    }
-
-    function decreasingUnsafeCount(report) {
-        if (report.length <= 1)
-            return 0;
-
-        const diff = report[0] - report[1];
-        if (diff >= 1 && diff <= 3) {
-            return decreasingUnsafeCount(report.slice(1));
-        }
-        return 1 + decreasingUnsafeCount([report[0], ...report.slice(2)])
-    }
     for (const report of reports) {
-        let i1 = increasingUnsafeCount(report)
-        let i2 = increasingUnsafeCount(report.slice(1)) + 1
-        let d1 = decreasingUnsafeCount(report)
-        let d2 = decreasingUnsafeCount(report.slice(1)) + 1
-        output.push(`[${i1} ${i2} ${d1} ${d2}] ${report.join(' ')}`)
-        if (i1 <= 1 || i2 <= 1 || d1 <= 1 || d2 <= 1) {
+
+        if (isSafe(report)) {
             safeCount++;
         }
-
-
+        else {
+            for (let i = 0; i < report.length; i++) {
+                if (isSafe([...report.slice(0, i), ...report.slice(i+1, report.length)])) {
+                    safeCount++;
+                    break;
+                }
+            }
+        }
     }
-    fs.writeFileSync('./dist/day2.txt', output.join('\n'), 'utf-8')
     return safeCount;
 }
 
